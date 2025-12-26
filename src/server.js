@@ -4,6 +4,7 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import healthRoute from "./routes/health.js";
+import authRoute from "./routes/auth.js";
 
 dotenv.config();
 
