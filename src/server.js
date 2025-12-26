@@ -18,6 +18,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", healthRoute);
+app.use("/api/auth", authRoute);
 
 // ✅ TEK VE DOĞRU MONGO BAĞLANTISI
 const MONGO_URI = process.env.MONGO_URI;
