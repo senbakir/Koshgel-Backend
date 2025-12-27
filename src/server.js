@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import meRoute from "./routes/me.js";
 
 import authRoute from "./routes/auth.js";
 import healthRoute from "./routes/health.js";
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoute);
 app.use("/api", healthRoute);
+app.use("/api", meRoute);
 
 mongoose
   .connect(process.env.MONGO_URI)
