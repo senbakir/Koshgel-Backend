@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import adminRoute from "./routes/admin.js";
 
 import authRoute from "./routes/auth.js";
 import healthRoute from "./routes/health.js";
 import meRoute from "./routes/me.js";
+import adminRoute from "./routes/admin.js";
 
 dotenv.config();
 
@@ -17,7 +17,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
-app.use("/api", adminRoute);
 
 // Root
 app.get("/", (req, res) => {
@@ -28,6 +27,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoute);
 app.use("/api", healthRoute);
 app.use("/api", meRoute);
+app.use("/api", adminRoute);
 
 // Mongo
 mongoose
