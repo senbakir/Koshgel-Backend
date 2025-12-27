@@ -1,4 +1,5 @@
 import express from "express";
+
 const router = express.Router();
 
 router.get("/health", (req, res) => {
@@ -6,7 +7,7 @@ router.get("/health", (req, res) => {
     ok: true,
     service: "koshgel",
     status: "healthy",
-    time: new Date()
+    time: new Date().toISOString()
   });
 });
 
