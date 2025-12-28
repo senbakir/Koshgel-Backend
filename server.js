@@ -10,59 +10,36 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
+// Middlewares
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Test routes
-app.get("/", (req, res) => {
-  res.send("Koshgel backend running ✅");
-});
-
-app.get("/health", (req, res) => {
-  res.json({ ok: true });
-});
-
-// API routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    ok: false,
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
-  });
+app.get("/", (req, res) => {
+  res.json({ ok: true, message: "Koshgel backend is running" });
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error("🔥 Error:", err);
-  res.status(500).json({ ok: false, error: err.message });
-});
-
+// Mongo + Server start
 const PORT = process.env.PORT || 10000;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-async function start() {
-  try {
-    if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI missing");
-    }
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET missing");
-    }
+if (!MONGODB_URI) {
+  console.error("❌ Startup failed: MONGODB_URI missing");
+  process.exit(1);
+}
 
-    await mongoose.connect(process.env.MONGODB_URI);
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
     console.log("✅ MongoDB connected");
-
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-  } catch (err) {
-    console.error("❌ Startup failed:", err.message);
+  })
+  .catch((err) => {
+    console.error("❌ Mongo connect error:", err.message);
     process.exit(1);
-  }
-}
-
-start();
+  });
