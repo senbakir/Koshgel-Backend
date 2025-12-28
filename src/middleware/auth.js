@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-export const auth = async (req, res, next) => {
+export const requireAuth = async (req, res, next) => {
   try {
     const header = req.headers.authorization;
+
     if (!header || !header.startsWith("Bearer ")) {
       return res.status(401).json({ ok: false, message: "No token" });
     }
@@ -22,4 +23,10 @@ export const auth = async (req, res, next) => {
     return res.status(401).json({ ok: false, message: "Invalid token" });
   }
 };
-export const requireAuth = auth;
+
+export const requireAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ ok: false, message: "Admin only" });
+  }
+  next();
+};
