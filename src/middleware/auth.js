@@ -22,3 +22,4 @@ export const auth = async (req, res, next) => {
     return res.status(401).json({ ok: false, message: "Invalid token" });
   }
 };
+export const requireAuth = auth;
