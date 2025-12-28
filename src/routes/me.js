@@ -1,9 +1,9 @@
 import express from "express";
-import { auth } from "../middleware/auth.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/me", auth, (req, res) => {
+router.get("/", requireAuth, (req, res) => {
   res.json({ ok: true, user: req.user });
 });
 
