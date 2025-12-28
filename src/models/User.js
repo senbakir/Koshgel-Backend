@@ -4,18 +4,10 @@ import bcrypt from "bcryptjs";
 const UserSchema = new mongoose.Schema(
   {
     fullName: { type: String, trim: true },
-
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-
-    // select:false => login sırasında password alanını özellikle select etmen gerekebilir
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, select: false },
 
+    // admin istiyorsan admin'i enum'a EKLE
     role: {
       type: String,
       enum: ["worker", "employer", "manager", "supervisor", "admin"],
@@ -27,22 +19,15 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password before saving
 UserSchema.pre("save", async function (next) {
-  try {
-    if (!this.isModified("password")) return next();
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
+  if (!this.isModified("password")) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
-// Compare plain password with hashed password
 UserSchema.methods.comparePassword = async function (plain) {
   return bcrypt.compare(plain, this.password);
 };
 
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
-export default User;
+export default mongoose.models.User || mongoose.model("User", UserSchema);
