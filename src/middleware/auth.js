@@ -25,8 +25,15 @@ export const requireAuth = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ ok: false, message: "Admin only" });
+  console.log("ADMIN CHECK USER:", req.user);
+
+  if (!req.user || !req.user.role) {
+    return res.status(403).json({ message: "Admin access denied" });
   }
+
+  if (req.user.role.toLowerCase() !== "admin") {
+    return res.status(403).json({ message: "Admin access denied" });
+  }
+
   next();
 };
