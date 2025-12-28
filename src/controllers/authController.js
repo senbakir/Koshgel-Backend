@@ -3,40 +3,32 @@ export const login = async (req, res) => {
     const { email, password } = req.body || {};
 
     if (!email || !password) {
-      return res.status(400).json({
-        ok: false,
-        message: "Email and password required"
-      });
+      return res.status(400).json({ ok: false, error: "Email and password required" });
     }
 
     const normalizedEmail = String(email).toLowerCase().trim();
 
-    const user = await User
-      .findOne({ email: normalizedEmail })
-      .select("+password");
+    // IMPORTANT: select password because schema has select:false
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
+    if (!user) return res.status(401).json({ ok: false, error: "Invalid credentials" });
 
-    if (!user) {
-      return res.status(401).json({
-        ok: false,
-        message: "Invalid credentials"
-      });
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.status(401).json({
-        ok: false,
-        message: "Invalid credentials"
-      });
-    }
+    const match = await bcrypt.compare(String(password), user.password);
+    if (!match) return res.status(401).json({ ok: false, error: "Invalid credentials" });
 
     const token = signToken(user);
-    return res.json({ ok: true, token });
 
-  } catch (err) {
-    return res.status(500).json({
-      ok: false,
-      error: err.message
+    // password'u response'a koyma
+    return res.json({
+      ok: true,
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        fullName: user.fullName,
+      },
     });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
   }
 };
