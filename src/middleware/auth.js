@@ -1,23 +1,14 @@
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
 
-export const requireAuth = async (req, res, next) => {
+export const requireAuth = (req, res, next) => {
   try {
-    const header = req.headers.authorization;
+    const header = req.headers.authorization || "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
 
-    if (!header || !header.startsWith("Bearer ")) {
-      return res.status(401).json({ ok: false, message: "No token" });
-    }
+    if (!token) return res.status(401).json({ ok: false, message: "No token" });
 
-    const token = header.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await User.findById(decoded.id).select("-password");
-    if (!user) {
-      return res.status(401).json({ ok: false, message: "User not found" });
-    }
-
-    req.user = user;
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ ok: false, message: "Invalid token" });
@@ -25,15 +16,7 @@ export const requireAuth = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  console.log("ADMIN CHECK USER:", req.user);
-
-  if (!req.user || !req.user.role) {
-    return res.status(403).json({ message: "Admin access denied" });
-  }
-
-  if (req.user.role.toLowerCase() !== "admin") {
-    return res.status(403).json({ message: "Admin access denied" });
-  }
-
+  if (!req.user) return res.status(401).json({ ok: false, message: "Unauthorized" });
+  if (req.user.role !== "admin") return res.status(403).json({ ok: false, message: "Admin only" });
   next();
 };
