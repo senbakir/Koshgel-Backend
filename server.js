@@ -1,54 +1,46 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
 import authRoutes from "./src/routes/auth.js";
-import meRoutes from "./src/routes/me.js";
-import healthRoutes from "./src/routes/health.js";
 import adminRoutes from "./src/routes/admin.js";
 
 dotenv.config();
 
 const app = express();
 
+// --- Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true }));
 
-// Root test
-app.get("/", (req, res) => {
-  res.json({ ok: true, service: "koshgel" });
-});
+// --- Routes
+app.get("/", (req, res) => res.send("Koshgel Backend Running ✅"));
+app.get("/health", (req, res) => res.json({ ok: true }));
 
-// Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/me", meRoutes);
-app.use("/api/health", healthRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ ok: false, error: err.message });
+// --- 404
+app.use((req, res) => {
+  res.status(404).json({ ok: false, message: `Route not found: ${req.method} ${req.originalUrl}` });
 });
 
+// --- Error handler
+app.use((err, req, res, next) => {
+  console.error("🔥 Server error:", err);
+  res.status(500).json({ ok: false, error: err.message || "Server error" });
+});
+
+// --- DB + Start
 const PORT = process.env.PORT || 10000;
 
-async function start() {
+const start = async () => {
   try {
-    if (!process.env.MONGO_URI) throw new Error("Missing MONGO_URI env var");
-    if (!process.env.JWT_SECRET) throw new Error("Missing JWT_SECRET env var");
-
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ MongoDB Connected");
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  } catch (e) {
-    console.error("❌ Startup failed:", e.message);
-    process.exit(1);
-  }
-}
-
-start();
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI missing in environment variables");
+    }
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET missing in environment variables");
+    }
