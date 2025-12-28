@@ -1,15 +1,10 @@
-import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
-import User from "../models/User.js";
+import express from "express";
+import { auth } from "../middleware/auth.js";
 
-const router = Router();
+const router = express.Router();
 
-router.get("/me", requireAuth, async (req, res) => {
-  const user = await User.findById(req.user.id);
-  res.json({
-    ok: true,
-    user: { id: user._id, fullName: user.fullName, email: user.email, role: user.role, categories: user.categories }
-  });
+router.get("/", auth, (req, res) => {
+  res.json({ ok: true, user: req.user });
 });
 
 export default router;
