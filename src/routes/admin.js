@@ -4,10 +4,13 @@ import { requireRole } from "../middleware/role.js";
 
 const router = Router();
 
-// Not: şimdilik rolü admin yapalım (ceo/manager sende yoksa 403 verir)
+// TEST endpoint
 router.get("/ping", requireAuth, requireRole("admin"), (req, res) => {
-  res.json({ ok: true, route: "admin", user: req.user });
+  res.json({
+    ok: true,
+    message: "admin route works",
+    user: req.user
+  });
 });
 
 export default router;
-
