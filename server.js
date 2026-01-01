@@ -13,20 +13,26 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.CORS_ORIGIN === "*" ? true : (process.env.CORS_ORIGIN || true),
-  credentials: true
-}));
+// --- Middlewares ---
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN === "*" ? true : (process.env.CORS_ORIGIN || true),
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 
+// --- Routes ---
 app.get("/", (req, res) => res.json({ ok: true, service: "koshgel" }));
 
-app.use("/api", healthRoute);        // /api/health
-app.use("/api/auth", authRoute);     // /api/auth/register , /api/auth/login
-app.use("/api", meRoute);            // /api/me
-app.use("/api", adminRoute);         // /api/admin/ping
+app.use("/api", healthRoute);      // /api/health
+app.use("/api/auth", authRoute);   // /api/auth/register , /api/auth/login
+app.use("/api", meRoute);          // /api/me
+app.use("/api", adminRoute);       // /api/admin/ping  (admin.js içinde tanımlı)
 
+// --- Start ---
 const PORT = process.env.PORT || 10000;
 
 async function start() {
