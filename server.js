@@ -14,42 +14,41 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN === "*" ? true : process.env.CORS_ORIGIN || true,
-    credentials: true,
-  })
-);
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 
 // Root
-app.get("/", (req, res) => res.json({ ok: true, service: "koshgel" }));
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "koshgel" });
+});
 
 // Routes
-app.use("/api", healthRoute);      // GET /api/health
-app.use("/api/auth", authRoute);   // /api/auth/register, /api/auth/login
-app.use("/api", meRoute);          // GET /api/me
-app.use("/api", adminRoute);       // GET /api/admin/ping
+app.use("/api", healthRoute);        // /api/health
+app.use("/api/auth", authRoute);     // /api/auth/login
+app.use("/api", meRoute);             // /api/me
+app.use("/api", adminRoute);          // /api/admin/ping
 
+// Server
 const PORT = process.env.PORT || 10000;
 
 async function start() {
-  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
-  if (!mongoUri) {
-    console.error("❌ MONGO_URI missing. Add it in Render Environment Variables.");
+  if (!process.env.MONGO_URI) {
+    console.error("❌ MONGO_URI missing");
     process.exit(1);
   }
 
   try {
-    await mongoose.connect(mongoUri);
-    console.log("✅ MongoDB Connected");
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected");
+
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   } catch (err) {
-    console.error("❌ MongoDB Error:", err?.message || err);
+    console.error("❌ MongoDB error:", err.message);
     process.exit(1);
   }
-
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 }
 
 start();
