@@ -13,30 +13,29 @@ dotenv.config();
 
 const app = express();
 
-// --- Middlewares ---
+// Middlewares
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN === "*" ? true : (process.env.CORS_ORIGIN || true),
+    origin: process.env.CORS_ORIGIN === "*" ? true : process.env.CORS_ORIGIN || true,
     credentials: true,
   })
 );
-
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 
-// --- Routes ---
+// Root
 app.get("/", (req, res) => res.json({ ok: true, service: "koshgel" }));
 
-app.use("/api", healthRoute);      // /api/health
-app.use("/api/auth", authRoute);   // /api/auth/register , /api/auth/login
-app.use("/api", meRoute);          // /api/me
-app.use("/api", adminRoute);       // /api/admin/ping  (admin.js içinde tanımlı)
+// Routes
+app.use("/api", healthRoute);      // GET /api/health
+app.use("/api/auth", authRoute);   // /api/auth/register, /api/auth/login
+app.use("/api", meRoute);          // GET /api/me
+app.use("/api", adminRoute);       // GET /api/admin/ping
 
-// --- Start ---
 const PORT = process.env.PORT || 10000;
 
 async function start() {
-  const mongoUri = process.env.MONGO_URI;
+  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
   if (!mongoUri) {
     console.error("❌ MONGO_URI missing. Add it in Render Environment Variables.");
     process.exit(1);
