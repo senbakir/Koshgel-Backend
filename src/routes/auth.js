@@ -5,11 +5,10 @@ import User from "../models/User.js";
 
 const router = Router();
 
-router.post("/auth/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body || {};
 
-    // 1) Body kontrol
     if (!email || !password) {
       return res.status(400).json({ ok: false, message: "email and password required" });
     }
@@ -19,7 +18,6 @@ router.post("/auth/login", async (req, res) => {
       return res.status(401).json({ ok: false, message: "Invalid credentials" });
     }
 
-    // 2) DB hash kontrol (alan adın password)
     if (!user.password) {
       return res.status(500).json({ ok: false, message: "User password hash missing in DB" });
     }
@@ -35,7 +33,12 @@ router.post("/auth/login", async (req, res) => {
     return res.json({
       ok: true,
       token,
-      user: { id: user._id.toString(), email: user.email, role: user.role, categories: user.categories || [] },
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        role: user.role,
+        categories: user.categories || [],
+      },
     });
   } catch (err) {
     console.error("LOGIN_ERROR:", err);
