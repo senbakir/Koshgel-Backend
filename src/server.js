@@ -63,6 +63,9 @@ async function start() {
   try {
     await mongoose.connect(mongoUri);
     console.log("✅ MongoDB Connected");
+     console.log("✅ Mongo DB Name:", mongoose.connection.name);
+console.log("✅ Mongo Host:", mongoose.connection.host);
+
   } catch (err) {
     console.error("❌ MongoDB Error:", err?.message || err);
     process.exit(1);
