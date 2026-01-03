@@ -50,3 +50,4 @@ router.post("/login", async (req, res) => {
     return res.status(500).json({ ok: false, message: "Login failed" });
   }
 });
+export default router;
