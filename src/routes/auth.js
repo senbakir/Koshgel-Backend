@@ -1,3 +1,10 @@
+import { Router } from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+
+const router = Router();   // 🔴 BU SATIR OLMADAN ASLA DEVAM ETME
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -15,24 +22,14 @@ router.post("/login", async (req, res) => {
       return res.status(500).json({ ok: false, message: "User password hash missing in DB" });
     }
 
-    let ok = false;
-    try {
-      ok = await bcrypt.compare(password, user.password);
-    } catch (e) {
-      // Hash bozuk / bcrypt formatı değilse burada patlar → 401 dönelim
-      console.error("BCRYPT COMPARE ERROR:", e?.message || e);
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
       return res.status(401).json({ ok: false, message: "Invalid credentials" });
     }
 
-    // ✅ TERSLİK BURADA DÜZELTİLDİ
-    if (!ok) {
-      return res.status(401).json({ ok: false, message: "Invalid credentials" });
-    }
-
-    const secret = process.env.JWT_SECRET; // env var zaten var sende
     const token = jwt.sign(
-      { _id: user._id.toString(), role: user.role },   // ✅ role eklendi
-      secret,
+      { _id: user._id.toString(), role: user.role },
+      process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -50,4 +47,5 @@ router.post("/login", async (req, res) => {
     return res.status(500).json({ ok: false, message: "Login failed" });
   }
 });
-export default router;
+
+export default router;   // 🔴 SADECE EN ALTTA
