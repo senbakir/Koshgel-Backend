@@ -4,14 +4,19 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 
-import healthRoute from "./src/routes/health.js";
-import authRoute from "./src/routes/auth.js";
-import meRoute from "./src/routes/me.js";
-import adminRoute from "./src/routes/admin.js";
+// ROUTES
+import healthRoute from "./routes/health.js";
+import authRoute from "./routes/auth.js";
+import meRoute from "./routes/me.js";
+import adminRoute from "./routes/admin.js";
 
 dotenv.config();
 
 const app = express();
+
+/* =====================
+   MIDDLEWARES
+===================== */
 
 // CORS
 app.use(
@@ -21,7 +26,7 @@ app.use(
   })
 );
 
-// ✅ KRİTİK: GET isteklerinde body gelirse JSON parser crash olmasın
+// JSON parser (GET’te body crash olmasın diye güvenli)
 app.use((req, res, next) => {
   if (req.method === "GET") return next();
   express.json({ limit: "1mb", strict: true })(req, res, next);
@@ -33,12 +38,14 @@ app.use(morgan("dev"));
 /* =====================
    ROUTES
 ===================== */
-app.get("/", (req, res) => res.json({ ok: true, service: "koshgel" }));
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "koshgel" });
+});
 
-app.use("/api", healthRoute);      // /api/health
-app.use("/api/auth", authRoute);   // /api/auth/register , /api/auth/login
-app.use("/api", meRoute);          // /api/me
-app.use("/api", adminRoute);       // /api/admin/ping
+app.use("/api", healthRoute);        // /api/health
+app.use("/api/auth", authRoute);     // /api/auth/login
+app.use("/api", meRoute);            // /api/me
+app.use("/api", adminRoute);         // /api/admin/ping
 
 /* =====================
    SERVER + DB
@@ -49,7 +56,7 @@ async function start() {
   const mongoUri = process.env.MONGO_URI;
 
   if (!mongoUri) {
-    console.error("❌ MONGO_URI missing. Add it in Render Environment Variables.");
+    console.error("❌ MONGO_URI missing");
     process.exit(1);
   }
 
@@ -61,7 +68,9 @@ async function start() {
     process.exit(1);
   }
 
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
 }
 
 start();
