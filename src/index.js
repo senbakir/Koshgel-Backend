@@ -1,30 +1,31 @@
 import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
+import mongoose from "mongoose";
 
-dotenv.config();
+import authRoutes from "./routes/auth.js";   // 👈 BU SATIR
+import adminRoutes from "./routes/admin.js"; // 👈 BU SATIR
+import { ensureCeoUser } from "./seed/ensureCeo.js";
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
+app.get("/api/health", (req, res) => res.json({ ok: true }));
+
+// 👇 BUNLAR YOKSA 404 ALIRSIN
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+
 const PORT = process.env.PORT || 10000;
 
-// Mongo connect
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => {
-    console.error("❌ Mongo error:", err.message);
-    process.exit(1);
-  });
+async function start() {
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log("MongoDB connected");
 
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true });
-});
+  await ensureCeoUser();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+  app.listen(PORT, () => console.log("Server running on port", PORT));
+}
+
+start();
