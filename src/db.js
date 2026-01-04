@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
 
-export async function connectDB(uri) {
-  if (!uri) throw new Error("MONGO_URI is missing");
+export async function connectDB() {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    throw new Error("MONGO_URI is missing in environment variables");
+  }
 
-  mongoose.set("strictQuery", true);
-
-  await mongoose.connect(uri, {
-    // mongoose v7+ için extra options gerekmez
-  });
-
+  await mongoose.connect(uri);
   console.log("MongoDB connected");
 }
